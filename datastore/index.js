@@ -6,11 +6,24 @@ const counter = require('./counter');
 var items = {};
 
 // Public API - Fix these CRUD functions ///////////////////////////////////////
+// var id = counter.getNextUniqueId();
+// items[id] = text;
+// callback(null, { id, text });
+
 
 exports.create = (text, callback) => {
-  var id = counter.getNextUniqueId();
-  items[id] = text;
-  callback(null, { id, text });
+  counter.getNextUniqueId((err, id) => {
+    fs.writeFile(`${exports.dataDir}/${id}.txt`, text, (err) => {
+      if (err) {
+        throw ('error writing to file');
+      } else {
+        callback(null, { id, text });
+      }
+    });
+  });
+  //call get next unique id with anonymous callback
+  //within callback create file called id and put text in it
+  //call top provided callback with object that has id and text
 };
 
 exports.readAll = (callback) => {
