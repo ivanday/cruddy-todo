@@ -68,14 +68,29 @@ exports.readOne = (id, callback) => {
   });
 };
 
+// var item = items[id];
+// if (!item) {
+//   callback(new Error(`No item with id: ${id}`));
+// } else {
+//   items[id] = text;
+//   callback(null, { id, text });
+// }
+
+//call readOne then on success writeFile, on error call callback
 exports.update = (id, text, callback) => {
-  var item = items[id];
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    items[id] = text;
-    callback(null, { id, text });
-  }
+  exports.readOne(id, (err, result) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      fs.writeFile(`${exports.dataDir}/${id}.txt`, text, (err) => {
+        if (err) {
+          callback(err, null);
+        } else {
+          callback(null, text);
+        }
+      });
+    }
+  });
 };
 
 exports.delete = (id, callback) => {
