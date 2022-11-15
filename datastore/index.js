@@ -38,24 +38,34 @@ exports.readAll = (callback) => {
       throw ('error reading dir in readAll');
     } else {
       var a = [];
+      //on success, iterate over items and read each file
       files.forEach(file => {
+        //push contents of each file to an array
         a.push({ id: file.slice(0, 5), text: file.slice(0, 5) });
       });
+      //call callback with err and the array
       callback(err, a);
     }
   });
-  //on success, iterate over items and read each file
-  //push contents of each file to an array
-  //call callback with err and the array
 };
 
+// var text = items[id];
+// if (!text) {
+//   callback(new Error(`No item with id: ${id}`));
+// } else {
+//   callback(null, { id, text });
+// }
+
 exports.readOne = (id, callback) => {
-  var text = items[id];
-  if (!text) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback(null, { id, text });
-  }
+  //fs readfile
+  fs.readFile(`${exports.dataDir}/${id}.txt`, (err, fileData) => {
+    if (err) {
+      console.log(err);
+      throw ('error reading file in readOne');
+    } else {
+      callback(err, fileData);
+    }
+  });
 };
 
 exports.update = (id, text, callback) => {
