@@ -12,25 +12,41 @@ var items = {};
 
 
 exports.create = (text, callback) => {
+  //call get next unique id with anonymous callback
   counter.getNextUniqueId((err, id) => {
+    //within callback create file called id and put text in it
     fs.writeFile(`${exports.dataDir}/${id}.txt`, text, (err) => {
       if (err) {
         throw ('error writing to file');
       } else {
+        //call top provided callback with object that has id and text
         callback(null, { id, text });
       }
     });
   });
-  //call get next unique id with anonymous callback
-  //within callback create file called id and put text in it
-  //call top provided callback with object that has id and text
 };
 
+// var data = _.map(items, (text, id) => {
+//   return { id, text };
+// });
+// callback(null, data);
+
 exports.readAll = (callback) => {
-  var data = _.map(items, (text, id) => {
-    return { id, text };
+  //read through directory
+  fs.readdir(exports.dataDir, (err, files) => {
+    if (err) {
+      throw ('error reading dir in readAll');
+    } else {
+      var a = [];
+      files.forEach(file => {
+        a.push({ id: file.slice(0, 5), text: file.slice(0, 5) });
+      });
+      callback(err, a);
+    }
   });
-  callback(null, data);
+  //on success, iterate over items and read each file
+  //push contents of each file to an array
+  //call callback with err and the array
 };
 
 exports.readOne = (id, callback) => {
