@@ -58,12 +58,12 @@ exports.readAll = (callback) => {
 
 exports.readOne = (id, callback) => {
   //fs readfile
-  fs.readFile(`${exports.dataDir}/${id}.txt`, (err, fileData) => {
+  fs.readFile(`${exports.dataDir}/${id}.txt`, 'utf8', (err, fileData) => {
     if (err) {
-      console.log(err);
-      throw ('error reading file in readOne');
+      callback(err, null);
     } else {
-      callback(err, fileData);
+      var result = { 'id': id, text: fileData };
+      callback(err, result);
     }
   });
 };
