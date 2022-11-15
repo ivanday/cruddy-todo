@@ -6,9 +6,6 @@ const counter = require('./counter');
 var items = {};
 
 // Public API - Fix these CRUD functions ///////////////////////////////////////
-// var id = counter.getNextUniqueId();
-// items[id] = text;
-// callback(null, { id, text });
 
 
 exports.create = (text, callback) => {
@@ -26,10 +23,6 @@ exports.create = (text, callback) => {
   });
 };
 
-// var data = _.map(items, (text, id) => {
-//   return { id, text };
-// });
-// callback(null, data);
 
 exports.readAll = (callback) => {
   //read through directory
@@ -37,24 +30,31 @@ exports.readAll = (callback) => {
     if (err) {
       throw ('error reading dir in readAll');
     } else {
-      var a = [];
+      var promises = [];
       //on success, iterate over items and read each file
       files.forEach(file => {
-        //push contents of each file to an array
-        a.push({ id: file.slice(0, 5), text: file.slice(0, 5) });
+        //create a new promise for each async reading of file
+        var newPromise = new Promise((resolve, reject) => {
+          fs.readFile(`${exports.dataDir}/${file}`, 'utf8', (err, fileData) => {
+            if (err) {
+              reject(err);
+            } else {
+              //on resolve, pass in file data
+              resolve({id: file.slice(0, 5), text: fileData});
+            }
+          });
+        });
+        //push the promise to an array
+        promises.push(newPromise);
       });
-      //call callback with err and the array
-      callback(err, a);
+      //check that all promises in array have evaluated, and when they have, call callback on the values
+      Promise.all(promises).then((values) => {
+        callback(err, values);
+      });
     }
   });
 };
 
-// var text = items[id];
-// if (!text) {
-//   callback(new Error(`No item with id: ${id}`));
-// } else {
-//   callback(null, { id, text });
-// }
 
 exports.readOne = (id, callback) => {
   //fs readfile
@@ -67,14 +67,6 @@ exports.readOne = (id, callback) => {
     }
   });
 };
-
-// var item = items[id];
-// if (!item) {
-//   callback(new Error(`No item with id: ${id}`));
-// } else {
-//   items[id] = text;
-//   callback(null, { id, text });
-// }
 
 //call readOne then on success writeFile, on error call callback
 exports.update = (id, text, callback) => {
@@ -92,15 +84,8 @@ exports.update = (id, text, callback) => {
     }
   });
 };
-//fs.unlink(path, callback)
-// var item = items[id];
-// delete items[id];
-// if (!item) {
-//   // report an error if item not found
-//   callback(new Error(`No item with id: ${id}`));
-// } else {
-//   callback();
-// }
+
+
 exports.delete = (id, callback) => {
   fs.unlink(`${exports.dataDir}/${id}.txt`, (err) => {
     if (err) {
